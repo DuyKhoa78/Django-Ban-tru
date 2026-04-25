@@ -1,0 +1,29 @@
+# Phục vụ cho Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Môi trường ảo (Virtual Environment)
+venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Thư mục chứa File Tĩnh khi gom lại (Production)
+staticfiles/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+.idea/
