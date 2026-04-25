@@ -34,24 +34,23 @@ SECURE_HSTS_PRELOAD = True
 # Nên phải dùng STATIC_ROOT để gm file lại cho Nginx tĩnh quản lý
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Lấy chuỗi kết nối từ biến môi trường do Azure tự động cung cấp
-try:
-    CONNECTION = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-    CONNECTION_STR = {pair.split('=')[0]: pair.split('=')[1] for pair in CONNECTION.split(' ')}
+# Tải biến môi trường từ file .env (rất quan trọng, đặc biệt khi dùng nền tảng cung cấp URL như Supabase/Render)
+from dotenv import load_dotenv
+import dj_database_url
 
+load_dotenv()
+
+# Đọc kết nối dạng URL (VD: postgresql://postgres:password@db.bfrbvkiihpnvyoctmhsw.supabase.co:5432/postgres)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': CONNECTION_STR.get('dbname'),
-            'USER': CONNECTION_STR.get('user'),
-            'PASSWORD': CONNECTION_STR.get('password'),
-            'HOST': CONNECTION_STR.get('host'),
-            'PORT': '5432',
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
-        }
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,  # Bắt buộc đối với Supabase
+        )
     }
-except KeyError:
-    # Báo lỗi nếu chạy mà quên cấu hình biến môi trường trên Azure
-    print("Warning: Chưa cấu hình AZURE_POSTGRESQL_CONNECTIONSTRING trong App Service")
+else:
+    print("Warning: Chưa cấu hình DATABASE_URL trong hệ thống hoặc file .env")
